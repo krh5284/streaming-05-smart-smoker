@@ -12,6 +12,7 @@ import csv
 import time
 
 
+
 #function to offer to open the RabbitMQ Admin website
 def offer_rabbitmq_admin_site():
     """Offer to open the RabbitMQ Admin website"""
@@ -43,6 +44,7 @@ def send_message(host: str, queue_name: str, message: str):
         # a durable queue will survive a RabbitMQ server restart
         # and help ensure messages are processed in order
         # messages will not be deleted until the consumer acknowledges
+        ch.queue_delete('01-smoker', '02-food-A', '03-food-B')
         ch.queue_declare(queue=queue_name, durable=True)
         # use the channel to publish a message to the queue
         # every message passes through an exchange
@@ -72,15 +74,16 @@ def read_csv_to_queue(filename: str):
             #send to queue based on data returned
             if smoker_temp:
                 message = (f'{time_stamp},{float(smoker_temp)}')
-                send_message("local_host","01-smoker", message)
+                send_message("localhost","01-smoker", message)
             if food_a_temp:
                 message = (f'{time_stamp},{float(food_a_temp)}')
-                send_message("local_host", "02-food-A", message)
+                send_message("localhost", "02-food-A", message)
             if food_b_temp:
                 message = (f'{time_stamp},{float(food_b_temp)}')
-                send_message("local_host", "03-food-B", message)
+                send_message("localhost", "03-food-B", message)
                 
-            time.sleep(1) # wait 30 seconds between messages
+            time.sleep(30) # wait 30 seconds between messages
+            print(f"Sent: {message}. Hit CTRL-c to stop.")
 
 
 
