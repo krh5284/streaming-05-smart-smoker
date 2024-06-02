@@ -4,36 +4,52 @@ Week 5 NWMSU Streaming Data
 Kellie Bernhardt
 "smart smoker" (as in slow cooked food)
 
-Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+##Description
+This producer generates messages from rows in a csv file and sends them to 3 seperate queues based upon the data provided
 
-Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+##Visuals
+![alt text](https://github.com/krh5284/streaming-04-multiple-consumers/blob/main/screenshot.png?raw=true)
 
-Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+##Installation
+Pika must be installed before importing. 
 
-Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+###Guided Producer Design 
+If this is the main program being executed (and you're not importing it for its functions),
+We should call a function to ask the user if they want to see the RabbitMQ admin webpage.
+We should call a function to begin the main work of the program.
+As part of the main work, we should
+Get a connection to RabbitMQ, and a channel, delete the 3 existing queues (we'll likely run this multiple times), and then declare them anew. 
+Open the csv file for reading (with appropriate line endings in case of Windows) and create a csv reader.
+For data_row in reader:
+[0] first column is the timestamp - we'll include this with each of the 3 messages below
+[1] Channel1 = Smoker Temp --> send to message queue "01-smoker"
+[2] Channe2 = Food A Temp --> send to message queue "02-food-A"
+[3] Channe3 = Food B Temp --> send to message queue "02-food-B"
+Send a tuple of (timestamp, smoker temp) to the first queue
+Send a tuple of (timestamp, food A temp) to the second queue
+Send a tuple of (timestamp, food B temp) to the third queue 
+Create a binary message from our tuples before using the channel to publish each of the 3 messages.
+Messages are strings, so use float() to get a numeric value where needed
+ Remember to use with to read the file, or close it when done.
 
-Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+###Producer Implementation Questions/Remarks
+Will you use a file docstring at the top? Hint: yes
+Where do imports go? Hint: right after the file/module docstring
+After imports, declare any constants.
+After constants, define functions.
+Define a function to offer the RabbitMQ admin site, use variables to turn it off temporarily if desired.
+Define a main function to
+connect,
+get a communication channel,
+use the channel to queue_delete() all 3 queues 
+use the channel to queue_declare() all 3 queues
+open the file, get your csv reader, for each row, use the channel to basic_publish() a message
+Use the Python idiom to only call  your functions if this is actually the program being executed (not imported). 
+If this is the program that was called:
+call your offer admin function() 
+call your main() function, passing in just the host name as an argument (we don't know the queue name or message yet)
+ 
 
-Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-License
-For open source projects, say how it is licensed.
-
-Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Handle User Interrupts Gracefully
+Will this process be running for a while (half sec per record)?
+If so, modify the code the option for the user to send a Keyboard interrupt (see earlier projects)

@@ -44,7 +44,7 @@ def send_message(host: str, queue_name: str, message: str):
         # a durable queue will survive a RabbitMQ server restart
         # and help ensure messages are processed in order
         # messages will not be deleted until the consumer acknowledges
-        ch.queue_delete('01-smoker', '02-food-A', '03-food-B')
+        #ch.queue_delete('01-smoker', '02-food-A', '03-food-B')
         ch.queue_declare(queue=queue_name, durable=True)
         # use the channel to publish a message to the queue
         # every message passes through an exchange
