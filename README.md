@@ -9,7 +9,7 @@ This producer generates messages from rows in a csv file and sends them to 3 sep
 
 ## Visuals
 
-![alt text](https://github.com/krh5284/streaming-04-multiple-consumers/blob/main/screenshot.png?raw=true)
+![alt text](https://github.com/krh5284/streaming-05-smart-smoker/blob/main/screenshot.png)
 
 ## Installation
 Pika must be installed before importing. 
