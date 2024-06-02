@@ -4,16 +4,17 @@ Week 5 NWMSU Streaming Data
 Kellie Bernhardt
 "smart smoker" (as in slow cooked food)
 
-##Description
+## Description
 This producer generates messages from rows in a csv file and sends them to 3 seperate queues based upon the data provided
 
-##Visuals
+## Visuals
+
 ![alt text](https://github.com/krh5284/streaming-04-multiple-consumers/blob/main/screenshot.png?raw=true)
 
-##Installation
+## Installation
 Pika must be installed before importing. 
 
-###Guided Producer Design 
+### Guided Producer Design 
 If this is the main program being executed (and you're not importing it for its functions),
 We should call a function to ask the user if they want to see the RabbitMQ admin webpage.
 We should call a function to begin the main work of the program.
@@ -32,7 +33,7 @@ Create a binary message from our tuples before using the channel to publish each
 Messages are strings, so use float() to get a numeric value where needed
  Remember to use with to read the file, or close it when done.
 
-###Producer Implementation Questions/Remarks
+### Producer Implementation Questions/Remarks
 Will you use a file docstring at the top? Hint: yes
 Where do imports go? Hint: right after the file/module docstring
 After imports, declare any constants.
@@ -50,6 +51,6 @@ call your offer admin function()
 call your main() function, passing in just the host name as an argument (we don't know the queue name or message yet)
  
 
-Handle User Interrupts Gracefully
+### Handle User Interrupts Gracefully
 Will this process be running for a while (half sec per record)?
 If so, modify the code the option for the user to send a Keyboard interrupt (see earlier projects)
