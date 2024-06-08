@@ -14,6 +14,10 @@ The consumer monitors the 3 queues and generates alerts if:
 
 ![alt text](https://github.com/krh5284/streaming-05-smart-smoker/blob/main/screenshot.png)
 
+![alt text](https://github.com/krh5284/streaming-05-smart-smoker/blob/main/consumer_smoker_screenshot.png)
+
+![alt text](https://github.com/krh5284/streaming-05-smart-smoker/blob/main/consumer_food_screenshot.png)
+
 ## Installation
 Pika must be installed before importing. 
 
