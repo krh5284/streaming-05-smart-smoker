@@ -33,18 +33,20 @@ def callback(ch, method, properties, body):
         smoker_history.append(temperature)
         if len(smoker_history) == 5:
             if (smoker_history[0] - smoker_history[-1]) >= ALERT_THRESHOLD_SMOKER:
-                print(" [ALERT] 01-smoker: Temperature dropped by 15 degrees or more in the last 2.5 minutes.")
+                print(" [ALERT] 01-smoker: Temperature dropped by 15 degrees or more in the last 5 readings.")
     elif queue_name == "02-food-A":
         food_a_history.append(temperature)
         if len(food_a_history) == 20:
             if max(food_a_history) - min(food_a_history) <= ALERT_THRESHOLD_FOOD:
-                print(" [ALERT] 02-food-A: Temperature change is 1 degree or less in the last 10 minutes.")
+                print(" [ALERT] 02-food-A: Temperature change is 1 degree or less in the last 20 readings.")
     elif queue_name == "03-food-B":
         food_b_history.append(temperature)
         if len(food_b_history) == 20:
             if max(food_b_history) - min(food_b_history) <= ALERT_THRESHOLD_FOOD:
                 print(" [ALERT] 03-food-B: Temperature change is 1 degree or less in the last 20 readings.")
 
+    # Simulate work by sleeping for a while
+    time.sleep(1)
 
     # When done with task, tell the user
     print(" [x] Done.")
@@ -53,36 +55,42 @@ def callback(ch, method, properties, body):
     # (now it can be deleted from the queue)
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
-def process_queue(hn, qn):
-    """Process messages from a specific queue."""
+def main(hn):
+    """Process messages from multiple queues."""
     try:
         # Create a blocking connection to the RabbitMQ server
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=hn))
         channel = connection.channel()
 
-        # Declare a durable queue
-        channel.queue_declare(queue=qn, durable=True)
+        # Declare the durable queues
+        channel.queue_declare(queue="01-smoker", durable=True)
+        channel.queue_declare(queue="02-food-A", durable=True)
+        channel.queue_declare(queue="03-food-B", durable=True)
+
+        # Set the QoS level to 1 to limit the number of messages being processed concurrently
         channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(queue=qn, on_message_callback=callback)
+
+        # Configure the channel to listen on specific queues with the shared callback
+        channel.basic_consume(queue="01-smoker", on_message_callback=callback)
+        channel.basic_consume(queue="02-food-A", on_message_callback=callback)
+        channel.basic_consume(queue="03-food-B", on_message_callback=callback)
 
         # Print a message to the console for the user
-        print(f" [*] Ready for work on queue {qn}. To exit press CTRL+C")
+        print(" [*] Ready for work on queues 01-smoker, 02-food-A, and 03-food-B. To exit press CTRL+C")
 
         # Start consuming messages
         channel.start_consuming()
 
     except Exception as e:
-        print(f"ERROR: something went wrong with queue {qn}.")
+        print(f"ERROR: something went wrong.")
         print(f"The error says: {e}")
     except KeyboardInterrupt:
         print(" User interrupted continuous listening process.")
     finally:
-        print(f"Closing connection for queue {qn}. Goodbye.\n")
+        print("Closing connection. Goodbye.\n")
         if connection.is_open:
             connection.close()
 
 # Standard Python idiom to indicate main program entry point
 if __name__ == "__main__":
-    queues = ["01-smoker", "02-food-A", "03-food-B"]
-    for queue_name in queues:
-        process_queue("localhost", queue_name)
+    main("localhost")
